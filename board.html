@@ -7,9 +7,35 @@
   </style>
 </head>
 <body>
+  <script src="handlebars-v4.0.5.js"></script>
   <script src="jquery.min.js"></script>
   <script src="underscore-min.js"></script>
   <script src="jquery-ui.min.js"></script>
+
+  <script id="playingBlock" type="text/x-handlebars-template">
+    <div
+      colour="{{ backgroundColor }}"
+      x="{{ x }}"
+      y="{{ y }}"
+      title="{{ title }}"
+      id="{{ id }}"
+      style="color: {{ colour }};"
+      class="playingBlock {{ colour }}Block"
+    ></div>
+  </script>
+
+  <script id="gamePiece" type="text/x-handlebars-template">
+    <div
+      side="{{ side }}"
+      colour="{{ colour }}"
+      piece="{{ piece }}"
+      class="gamePiece"
+      id="{{ id }}"
+    >
+      <img src="{{ img }}" style="width: 100%;">
+    </div>
+  </script>
+
   <script>
     "use strict";
 
@@ -78,6 +104,14 @@
     moveReg = [],
 
     gMovesList = {},
+
+
+    templates = {
+      'playingBlock': {},
+      'gamePiece': {}
+    },
+    //get comeplete html with data from templates
+    // html = templates(aData);
 
     pieces = {
       white : {
@@ -824,7 +858,7 @@
     },
 
     buildBoard = function () {
-      var x, y, id, width, backgroundColor, color,
+      var x, y, id, width, backgroundColor, colour, blockData, playingBlock,
         xCnt = board.xAxisBlocks,
         yCnt = board.yAxisBlocks;
 
@@ -833,8 +867,19 @@
           id = 'x' + x + '_y' + y;
           gBlockIndex.push(id);
           backgroundColor = (x + y) % 2 ? 'black' : 'white';
-          color = (x + y) % 2 ? 'white' : 'black';
-          $('body').append('<div colour="' + backgroundColor + '" x="' + 100 * x + '" y="' + 100 * y + '" title="block: ' + x + ' / ' + y + '" id="' + id + '" style="color: ' + color + '; xbackground-color: ' + backgroundColor + ';" class="playingBlock '+ backgroundColor + 'Block"></div>');
+          colour = (x + y) % 2 ? 'white' : 'black';
+
+          blockData = {
+            backgroundColor: backgroundColor,
+            x: x * 100,
+            y: y * 100,
+            title: 'block: ' + x + ' / ' + y,
+            id: id,
+            colour: colour
+          };
+          playingBlock = templates.playingBlock(blockData);
+          $('body').append(playingBlock);
+
           gBlockArr[id] = 'empty';
         }
       }
@@ -844,6 +889,7 @@
       $('body').append('<div title="taken pieces" style="top: 800px; left: 0px;" class="takenPieces">Taken Pieces</div>');
 
       shuffle(gBlockIndex);
+      gIndex = 0;
       moveBlock();
     },
 
@@ -853,7 +899,7 @@
 
     placePieces = function(){
       var cKey, pKey, piece, pieceID, blockID, htmlPiece, y, bgImg, side = {},
-        yPawn = {};
+        yPawn = {}, gamePiece, pieceData;
 
       $.extend(gPiecesReset = {}, pieces);
 
@@ -874,13 +920,22 @@
             y = 1;
           }
 
-          $.extend(pieces[cKey][pKey], {side: side[cKey]})
+          $.extend(piece, {side: side[cKey]})
 
           blockID = 'x' + piece.x + '_y' + piece.y;
-          bgImg = 'pieces/' + pieces[cKey][pKey].name + '-' + cKey + '.png';
+          bgImg = 'pieces/' + piece.name + '-' + cKey + '.png';
           pieceID = cKey + '_' + pKey;
-          htmlPiece = '<div side="' + side[cKey] + '" colour="' + cKey + '" piece="' + pieces[cKey][pKey].name + '" class="gamePiece" id="' + pieceID + '"><img src="' + bgImg + '" style="width: 100%;"></div>';
-          $('#' + blockID).html(htmlPiece);
+
+          pieceData = {
+            side: side[cKey],
+            colour: cKey,
+            piece: piece.name,
+            id: pieceID,
+            img: bgImg
+          };
+          gamePiece = templates.gamePiece(pieceData);
+          $('#' + blockID).html(gamePiece);
+
           gBlockArr[blockID] = pieceID;
         }
       }
@@ -904,9 +959,40 @@
           kingBlock.html(clone);
         }
       }
+    },
+
+/*
+    templates = {
+      'playingBlock': {
+        url: 'playingBlock.html',
+        html: ''
+      },
+      'gamePiece': {
+        url: 'gamePiece.html',
+        html: ''
+      }
+    },
+
+*/
+    getTemplates = function () {
+      var
+        tKeys = Object.keys(templates),
+        template, source, tKey;
+
+      for (tKey in templates) {
+        console.log('tKey', tKey);
+        source  = $('#' + tKey).html();
+
+        // console.log('source', source);
+
+        templates[tKey] = Handlebars.compile(source);
+      }
     };
 
-    buildBoard();
+    $(document).ready(function(){
+      getTemplates();
+      buildBoard();
+    });
 
   </script>
 </body>
