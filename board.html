@@ -182,7 +182,10 @@
             isDoubleMoveBlockEmpty =  gBlockArr[doubleMoveBlockID] === 'empty',
             move,
             possibleMoves = [],
-            moves;
+            moves,
+            tKey,
+
+            possibleMoves = getCleanFilter();
 
           if (isMoveBlockEmpty) {
             move = {
@@ -191,7 +194,8 @@
               type: 'move',
               direction: 'forward'
             }
-            possibleMoves.push(move);
+            possibleMoves['move'].push(move);
+            // possibleMoves.push(move);
           }
 
           if (values.pieceMoveCount === 0 && isDoubleMoveBlockEmpty && isMoveBlockEmpty) {
@@ -201,20 +205,26 @@
               type: 'move',
               direction: 'forward'
             }
-            possibleMoves.push(move);
+            possibleMoves['move'].push(move);
+            // possibleMoves.push(move);
           }
 
           moves = removeFriendlyFire(values);
 
           for(mKey in moves){
-            // pawns only move forward
-            if ((values.pieceBlockXY.y - moves[mKey].y) !== values.moveDirection) {
-              //pawn cant move diagonal
-              if (moves[mKey].type === 'move' && moves[mKey].direction === 'diagonal'){
+            for (tKey in moves[mKey]) {
+              move = moves[mKey][tKey];
+              // pawns only move forward
+              if ((values.pieceBlockXY.y - move.y) !== values.moveDirection) {
+                //pawn cant move diagonal
+                if (move.type === 'move' && move.direction === 'diagonal') {
 
-              }
-              else {
-                possibleMoves.push(moves[mKey]);
+                }
+                else {
+                  // possibleMoves.push(moves[mKey]);
+                  possibleMoves[move.type].push(move);
+
+                }
               }
             }
           }
@@ -224,20 +234,26 @@
     },
 
     removeFriendlyFire = function (aMoves) {
-      var move, possibleMoves = [], bKey, blockID, blockContent, isOccupied,
-        pieceColour;
+      // console.log('removeFriendlyFire', aMoves);
+      var move, bKey, blockID, blockContent, isOccupied,
+        pieceColour, moves, mKey,
+        possibleMoves = getCleanFilter();
 
       for(bKey in aMoves.blocks){
-        move = aMoves.blocks[bKey];
-        blockID = 'x' + move.x + '_y' + move.y;
-        blockContent = gBlockArr[blockID];
-        isOccupied = blockContent !== 'empty';
-        pieceColour = isOccupied ? getPieceKeys(blockContent).colour : isOccupied;
+        moves = aMoves.blocks[bKey];
+        for (mKey in moves) {
+          move = moves[mKey];
+          blockID = 'x' + move.x + '_y' + move.y;
+          blockContent = gBlockArr[blockID];
+          isOccupied = blockContent !== 'empty';
+          pieceColour = isOccupied ? getPieceKeys(blockContent).colour : isOccupied;
 
-        if (pieceColour !== aMoves.pieceColour) {
-          possibleMoves.push(move);
+          if (pieceColour !== aMoves.pieceColour) {
+            possibleMoves[move.type].push(move);
+          }
         }
       }
+      // console.log('possibleMoves', possibleMoves);
       return possibleMoves;
     },
 
@@ -275,16 +291,7 @@
         rules = gRules[pieceType],
         aDirections = rules.direction,
 
-
-        // blocks = {
-        //   check: [],
-        //   move: [],
-        //   attack: [],
-        //   castle: []
-        // },
-
-
-        aa;
+        blocks = getCleanFilter();
 
       //go though all directions of moves
       for (dKey in aDirections) {
@@ -332,7 +339,9 @@
               blockID = 'x' + x + '_y' + y;
               if (gBlockArr[blockID]) {
                 blockContent = $('#x' + x + '_y' + y).html();
-                blocks.push({
+
+                blocks[getMoveType(blockID)].push({
+                // blocks.push({
                   x: x,
                   y: y,
                   type: getMoveType(blockID),
@@ -370,7 +379,9 @@
                   blockID = 'x' + x + '_y' + y;
                   if (gBlockArr[blockID]) {
                     blockContent = $('#x' + x + '_y' + y).html();
-                    blocks.push({
+
+                    blocks[getMoveType(blockID)].push({
+                    // blocks.push({
                       x: x,
                       y: y,
                       type: getMoveType(blockID),
@@ -411,7 +422,9 @@
                   blockID = 'x' + x + '_y' + y;
                   if (gBlockArr[blockID]) {
                     blockContent = $('#x' + x + '_y' + y).html();
-                    blocks.push({
+
+                    blocks[getMoveType(blockID)].push({
+                    // blocks.push({
                       x: x,
                       y: y,
                       type: getMoveType(blockID),
@@ -442,38 +455,52 @@
       gBlockArr[aToBlockID] = aToBlockContent;
     },
 
+    getCleanFilter = function () {
+      return {
+        check: [],
+        move: [],
+        attack: [],
+        castle: []
+      }
+    },
+
     filterForEscapeCheckMoves = function (aMoves) {
-      var filteredBlocks = [], bKey, blockID, toBlockContent, toBlockID,
-        fromBlockID, inCheck;
+      var
+        mKey, tKey, blockID, toBlockContent, toBlockID,
+        fromBlockID, inCheck, move,
+        filteredBlocks = getCleanFilter();
 
       //loop through blocks
-      for (bKey in aMoves) {
-        blockID = 'x' + aMoves[bKey].x + '_y' + aMoves[bKey].y;
-        //if possible move block exists on board
-        if(gBlockArr[blockID]){
-          gWhoIsInCheck.clearCheck();
+      for (mKey in aMoves) {
+        for (tKey in aMoves[mKey]) {
+          move = aMoves[mKey][tKey];
+          blockID = 'x' + move.x + '_y' + move.y;
+          //if possible move block exists on board
+          if(gBlockArr[blockID]){
+            gWhoIsInCheck.clearCheck();
 
-          toBlockContent = gBlockArr[blockID];
-          toBlockID = blockID;
-          fromBlockID = $('.highlighted').attr('id');
+            toBlockContent = gBlockArr[blockID];
+            toBlockID = blockID;
+            fromBlockID = $('.highlighted').attr('id');
 
-          //play test move
-          playTestMoveForward(fromBlockID, toBlockID);
+            //play test move
+            playTestMoveForward(fromBlockID, toBlockID);
 
-          // check if move gets player out of check
-          inCheck = isKingChecked(turn.player.colour);
+            // check if move gets player out of check
+            inCheck = isKingChecked(turn.player.colour);
 
-          if (!inCheck) {
-            filteredBlocks.push(aMoves[bKey]);
-          }
-          else {
-            // check if attacking moves are defending the king and allow through
-            if (aMoves[bKey].type === 'attack' && isDefendingKing(toBlockID)) {
-              filteredBlocks.push(aMoves[bKey]);
+            if (!inCheck) {
+              filteredBlocks[move.type].push(move);
             }
+            else {
+              // check if attacking moves are defending the king and allow through
+              if (move.type === 'attack' && isDefendingKing(toBlockID)) {
+                filteredBlocks[move.type].push(move);
+              }
+            }
+            //revert test move
+            playTestMoveBack(fromBlockID, toBlockID, toBlockContent);
           }
-          //revert test move
-          playTestMoveBack(fromBlockID, toBlockID, toBlockContent);
         }
       }
       return filteredBlocks;
@@ -526,19 +553,25 @@
     },
 
     highLightBLocks = function (aMoves) {
-      var bKey, blockID, $block, move, aMoves = filterForEscapeCheckMoves(aMoves);
+
+      // console.log('highLightBLocks', aMoves);
+
+      var bKey, blockID, $block, move, tKey,
+
+      aMoves = filterForEscapeCheckMoves(aMoves),
+
+
+      aaa;
 
       gMovesList = [];
 
-      if (aMoves.length > 0) {
-        for (bKey in aMoves) {
-          move = aMoves[bKey];
+      for (bKey in aMoves) {
+        for (tKey in aMoves[bKey]) {
+          move = aMoves[bKey][tKey];
           blockID = 'x' + move.x + '_y' + move.y;
           // push move into global arr to check for crazy moves laters
           gMovesList.push(move);
-
           $block = $('#' + blockID);
-
           if (gBlockArr[blockID] !== 'empty') {
             $($block.children()[0]).on('click', movePiece);
           }
@@ -651,7 +684,8 @@
     isKingChecked = function (aKingColour, aWho, aIsWhiteQueenUnderAttack) {
       var
         enemyColour = aKingColour === 'white' ? 'black' : 'white', pKey,
-        inCheck = false, moves, values, mKey, pieceType, pieceID, blockID;
+        inCheck = false, moves, values, mKey, pieceType, pieceID, blockID, tKey,
+        move;
 
       // run through all peices of enemny colour
       for (pKey in pieces[enemyColour]) {
@@ -668,11 +702,14 @@
 
         //loop through moves
         for(mKey in moves){
-          //if any have the type 'check'
-          if (moves[mKey].type === 'check') {
-            inCheck = true;
-            gWhoIsInCheck[aKingColour] = inCheck;
-            gWhoIsInCheck.attackers[enemyColour].push({pKey: pKey, blockID: blockID});
+          for (tKey in moves[mKey]) {
+            move = moves[mKey][tKey];
+            //if any have the type 'check'
+            if (move.type === 'check') {
+              inCheck = true;
+              gWhoIsInCheck[aKingColour] = inCheck;
+              gWhoIsInCheck.attackers[enemyColour].push({pKey: pKey, blockID: blockID});
+            }
           }
         }
       }
