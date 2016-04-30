@@ -54,6 +54,9 @@
     .checkBlock{
       border: solid 10px yellow;
     }
+    .castleBlock{
+      border: solid 10px purple;
+    }
     .gamePiece{
       width: 70%;
       height: 70%;
