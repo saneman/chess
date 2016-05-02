@@ -565,7 +565,7 @@ registerMove = function (aFromBlockID, aToBlockID, aPieceHtml) {
     enemyPieceID: enemyPieceID,
     state: gBlockArr
   };
-  moveReg.push(move);
+  gMoveReg.push(move);
 },
 
 isKingChecked = function (aKingColour, aWho, aIsWhiteQueenUnderAttack) {
@@ -617,14 +617,14 @@ clearPossibleMoves = function () {
 displayMoveListPanel = function () {
   var mKey, html;
   //display crap pointless ignore
-  for (mKey in moveReg){
-    if (moveReg[mKey].enemyPieceID === undefined) {
-    html += '<hr>piece[' + moveReg[mKey].attackingPieceID + '] on block[' +
-      moveReg[mKey].fromBlockID + '] moved to block[' + moveReg[mKey].toBlockID + ']';
+  for (mKey in gMoveReg){
+    if (gMoveReg[mKey].enemyPieceID === undefined) {
+    html += '<hr>piece[' + gMoveReg[mKey].attackingPieceID + '] on block[' +
+      gMoveReg[mKey].fromBlockID + '] moved to block[' + gMoveReg[mKey].toBlockID + ']';
     }else{
-    html += '<hr>piece[' + moveReg[mKey].attackingPieceID + '] on block[' +
-      moveReg[mKey].fromBlockID + '] attacked block[' + moveReg[mKey].toBlockID +
-      '] and took piece[' + moveReg[mKey].enemyPieceID + ']';
+    html += '<hr>piece[' + gMoveReg[mKey].attackingPieceID + '] on block[' +
+      gMoveReg[mKey].fromBlockID + '] attacked block[' + gMoveReg[mKey].toBlockID +
+      '] and took piece[' + gMoveReg[mKey].enemyPieceID + ']';
     }
   }
   $('.moves').html(html);

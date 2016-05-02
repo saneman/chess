@@ -63,18 +63,14 @@ board = {
   yAxisBlocks : 8
 },
 
-moveReg = [],
+gMoveReg = [],
 
 gMovesList = {},
 
-
 templates = {
   'playingBlock': Handlebars.compile($('#playingBlock').html()),
-  // 'playingBlock': {},
   'gamePiece': Handlebars.compile($('#gamePiece').html())
 },
-//get comeplete html with data from templates
-// html = templates(aData);
 
 gPieces = {
   white : {
