@@ -2,130 +2,15 @@
 
 var
 
-colours = {
-  white: 'white',
-  black: 'black'
-},
-
-gWhoIsInCheck = {
-  white: false,
-  black: false,
-  attackers: {
-    white: [],
-    black: []
-  },
-  clearCheck: function () {
-    this.white = false;
-    this.black = false;
-    this.attackers.white = [];
-    this.attackers.black = [];
-  }
-},
-
-players = {
-  a: {
-    name: 'Guy',
-    colour: colours.white,
-    side: 'bottom',
-    inCheck: false
-  },
-  b: {
-    name: 'Melissa',
-    colour: colours.black,
-    side: 'top',
-    inCheck: false
-  }
-},
-
-sides = {
-  top: {
-    y: 0
-  },
-  bottom:{
-    y: 7
-  }
-},
-
-blockColours = {
-  attack: 'red',
-  move: 'blue',
-  check: 'yellow'
-},
-
-turn = {
-  player: (players.a.colour === 'white') ? players.a : players.b,
-  turnCount: 0
-},
-
-board = {
-  xAxisBlocks : 8,
-  yAxisBlocks : 8
-},
-
-moveReg = [],
-
-gMovesList = {},
-
-
-templates = {
-  'playingBlock': Handlebars.compile($('#playingBlock').html()),
-  // 'playingBlock': {},
-  'gamePiece': Handlebars.compile($('#gamePiece').html())
-},
-//get comeplete html with data from templates
-// html = templates(aData);
-
-gPieces = {
-  white : {
-    k  : {name: 'King', x: 4, y: 7, moveCount: 0},
-    q  : {name: 'Queen', x: 3, y: 7, moveCount: 0},
-    r1 : {name: 'Rook', x: 0, y: 7, moveCount: 0},
-    r2 : {name: 'Rook', x: 7, y: 7, moveCount: 0},
-    b1 : {name: 'Bishop', x: 2, y: 7, moveCount: 0},
-    b2 : {name: 'Bishop', x: 5, y: 7, moveCount: 0},
-    k1 : {name: 'Knight', x: 1, y: 7, moveCount: 0},
-    k2 : {name: 'Knight', x: 6, y: 7, moveCount: 0},
-    p1 : {name: 'Pawn', x: 0, y: 6, moveCount: 0},
-    p2 : {name: 'Pawn', x: 1, y: 6, moveCount: 0},
-    p3 : {name: 'Pawn', x: 2, y: 6, moveCount: 0},
-    p4 : {name: 'Pawn', x: 3, y: 6, moveCount: 0},
-    p5 : {name: 'Pawn', x: 4, y: 6, moveCount: 0},
-    p6 : {name: 'Pawn', x: 5, y: 6, moveCount: 0},
-    p7 : {name: 'Pawn', x: 6, y: 6, moveCount: 0},
-    p8 : {name: 'Pawn', x: 7, y: 6, moveCount: 0}
-  },
-  black : {
-    k  : {name: 'King', x: 4, y: 0, moveCount: 0},
-    q  : {name: 'Queen', x: 3, y: 0, moveCount: 0},
-    r1 : {name: 'Rook', x: 0, y: 0, moveCount: 0},
-    r2 : {name: 'Rook', x: 7, y: 0, moveCount: 0},
-    b1 : {name: 'Bishop', x: 2, y: 0, moveCount: 0},
-    b2 : {name: 'Bishop', x: 5, y: 0, moveCount: 0},
-    k1 : {name: 'Knight', x: 1, y: 0, moveCount: 0},
-    k2 : {name: 'Knight', x: 6, y: 0, moveCount: 0},
-    p1 : {name: 'Pawn', x: 0, y: 1, moveCount: 0},
-    p2 : {name: 'Pawn', x: 1, y: 1, moveCount: 0},
-    p3 : {name: 'Pawn', x: 2, y: 1, moveCount: 0},
-    p4 : {name: 'Pawn', x: 3, y: 1, moveCount: 0},
-    p5 : {name: 'Pawn', x: 4, y: 1, moveCount: 0},
-    p6 : {name: 'Pawn', x: 5, y: 1, moveCount: 0},
-    p7 : {name: 'Pawn', x: 6, y: 1, moveCount: 0},
-    p8 : {name: 'Pawn', x: 7, y: 1, moveCount: 0}
-  }
-},
-
-gPiecesReset = {},
-
-gBlockArr = {},
-gBlockIndex = [],
-gIndex = 0,
-
 gRules = {
   King: {
     direction: ['diagonal', 'perpendicular'],
     distance: 1,
     attack: ['diagonal', 'perpendicular'],
-    calculatePossibleMoves: function (aValues) {
+    calculatePossibleMoves: function (aValues, aWho) {
+      // console.log('King');
+      aValues.blocks['castle'] = getCastlingMoves(aValues.blocks, aWho);
+
       return removeFriendlyFire(aValues);
     }
   },
@@ -133,7 +18,7 @@ gRules = {
     direction: ['diagonal', 'perpendicular'],
     distance: -1,
     attack: ['diagonal', 'perpendicular'],
-    calculatePossibleMoves: function (aValues) {
+    calculatePossibleMoves: function (aValues, aWho) {
       return removeFriendlyFire(aValues);
     }
   },
@@ -141,7 +26,7 @@ gRules = {
     direction: ['perpendicular'],
     distance: -1,
     attack: ['perpendicular'],
-    calculatePossibleMoves: function (aValues) {
+    calculatePossibleMoves: function (aValues, aWho) {
       return removeFriendlyFire(aValues);
     }
   },
@@ -149,7 +34,7 @@ gRules = {
     direction: ['diagonal'],
     distance: -1,
     attack: ['diagonal'],
-    calculatePossibleMoves: function (aValues) {
+    calculatePossibleMoves: function (aValues, aWho) {
       return removeFriendlyFire(aValues);
     }
   },
@@ -157,7 +42,7 @@ gRules = {
     direction: ['jump'],
     distance: 3,
     attack: ['jump'],
-    calculatePossibleMoves: function (aValues) {
+    calculatePossibleMoves: function (aValues, aWho) {
       return removeFriendlyFire(aValues);
     }
   },
@@ -165,7 +50,7 @@ gRules = {
     direction: ['diagonal'],
     distance: 1,
     attack: ['diagonal'],
-    calculatePossibleMoves: function (aValues) {
+    calculatePossibleMoves: function (aValues, aWho) {
       var
         values = aValues,
         mKey,
@@ -230,7 +115,6 @@ gRules = {
 },
 
 removeFriendlyFire = function (aMoves) {
-  // console.log('removeFriendlyFire', aMoves);
   var move, bKey, blockID, blockContent, isOccupied,
     pieceColour, moves, mKey,
     possibleMoves = getCleanFilter();
@@ -249,7 +133,6 @@ removeFriendlyFire = function (aMoves) {
       }
     }
   }
-  // console.log('possibleMoves', possibleMoves);
   return possibleMoves;
 },
 
@@ -458,11 +341,12 @@ getCleanFilter = function () {
   }
 },
 
+// take an array of moves and filters
 filterForEscapeCheckMoves = function (aMoves) {
   var
     mKey, tKey, blockID, toBlockContent, toBlockID,
     fromBlockID, inCheck, move,
-    filteredBlocks = getCleanFilter();
+    filteredMoves = getCleanFilter();
 
   //loop through blocks
   for (mKey in aMoves) {
@@ -481,15 +365,15 @@ filterForEscapeCheckMoves = function (aMoves) {
         playTestMoveForward(fromBlockID, toBlockID);
 
         // check if move gets player out of check
-        inCheck = isKingChecked(turn.player.colour);
+        inCheck = isKingChecked(turn.player.colour, 'filterForEscapeCheckMoves {'+ turn.player.colour +'}: ' + blockID);
 
         if (!inCheck) {
-          filteredBlocks[move.type].push(move);
+          filteredMoves[move.type].push(move);
         }
         else {
           // check if attacking moves are defending the king and allow through
           if (move.type === 'attack' && isDefendingKing(toBlockID)) {
-            filteredBlocks[move.type].push(move);
+            filteredMoves[move.type].push(move);
           }
         }
         //revert test move
@@ -497,7 +381,7 @@ filterForEscapeCheckMoves = function (aMoves) {
       }
     }
   }
-  return filteredBlocks;
+  return filteredMoves;
 },
 
 isDefendingKing = function (aBlockID){
@@ -547,8 +431,10 @@ clearClicks = function () {
 },
 
 highLightBlocks = function (aMoves) {
-  var mKey, blockID, $block, move, tKey,
-    moves = filterForEscapeCheckMoves(aMoves);
+
+  // console.log('highLightBlocks aMoves: ', aMoves);
+
+  var mKey, blockID, $block, move, tKey, moves = aMoves;
 
   gMovesList = [];
 
@@ -571,15 +457,14 @@ highLightBlocks = function (aMoves) {
 },
 
 isLeagalMove = function (aBlockID) {
-  var mKey, move, legal = false;
-
+  var mKey, move, legalType = false;
   for (mKey in gMovesList) {
     move = gMovesList[mKey];
     if ('x' + move.x + '_y' + move.y === aBlockID) {
-      legal = true;
+      legalType = move.type;
     }
   }
-  return legal;
+  return legalType;
 },
 
 movePiece = function (aElement) {
@@ -595,9 +480,14 @@ movePiece = function (aElement) {
     pieceID = $(pieceHtml).attr('id'),
     pieceKeys,
     invertColour = turn.player.colour === 'white' ? 'black' : 'white',
-    inCheck = false;
+    inCheck = false,
+    moveType = isLeagalMove(blockID),
+    king,
+    rookKey, rook,
+    rookBlockID,
+    newRookX;
 
-  if (isLeagalMove(blockID)) {
+  if (moveType) {
 
     gWhoIsInCheck.clearCheck();
 
@@ -611,6 +501,17 @@ movePiece = function (aElement) {
 
     //register the move
     registerMove(highlighted.attr('id'), blockID, pieceHtml);
+
+    //move rook when castling
+    if (moveType === 'castle') {
+      king = gPieces[turn.player.colour].k;
+      rookKey = king.x > 4 ? 'r2' : 'r1';
+      rook = gPieces[turn.player.colour][rookKey];
+      rookBlockID = 'x' + rook.x + '_y' + rook.y;
+      newRookX = king.x + (rookKey === 'r1' ? 1 : -1);
+      blockID = 'x' + newRookX + '_y' + rook.y;
+      registerMove(rookBlockID, blockID, $('#' + rookBlockID).html());
+    }
 
     // check if move put the oppenents king in check
     inCheck = isKingChecked(invertColour);
@@ -667,7 +568,6 @@ registerMove = function (aFromBlockID, aToBlockID, aPieceHtml) {
   moveReg.push(move);
 },
 
-//checks if king is in check
 isKingChecked = function (aKingColour, aWho, aIsWhiteQueenUnderAttack) {
   var
     enemyColour = aKingColour === 'white' ? 'black' : 'white', pKey,
@@ -685,7 +585,7 @@ isKingChecked = function (aKingColour, aWho, aIsWhiteQueenUnderAttack) {
     //get values for calculating moves
     values = prepareMoveVariables({pieceID: pieceID, blockID: blockID}, pKey);
     //get possible moves
-    moves = gRules[pieceType].calculatePossibleMoves(values, pKey);
+    moves = gRules[pieceType].calculatePossibleMoves(values, aWho);
 
     //loop through moves
     for(mKey in moves){
@@ -708,6 +608,7 @@ clearPossibleMoves = function () {
   $('.playingBlock').removeClass('highlighted');
   $('.playingBlock').removeClass('moveBlock');
   $('.playingBlock').removeClass('attackBlock');
+  $('.playingBlock').removeClass('castleBlock');
 
   $('.playingBlock').off('click');
   // $('.gamePiece').off('click');
@@ -718,9 +619,12 @@ displayMoveListPanel = function () {
   //display crap pointless ignore
   for (mKey in moveReg){
     if (moveReg[mKey].enemyPieceID === undefined) {
-    html += '<hr>piece[' + moveReg[mKey].attackingPieceID + '] on block[' + moveReg[mKey].fromBlockID + '] moved to block[' + moveReg[mKey].toBlockID + ']';
+    html += '<hr>piece[' + moveReg[mKey].attackingPieceID + '] on block[' +
+      moveReg[mKey].fromBlockID + '] moved to block[' + moveReg[mKey].toBlockID + ']';
     }else{
-    html += '<hr>piece[' + moveReg[mKey].attackingPieceID + '] on block[' + moveReg[mKey].fromBlockID + '] attacked block[' + moveReg[mKey].toBlockID + '] and took piece[' + moveReg[mKey].enemyPieceID + ']';
+    html += '<hr>piece[' + moveReg[mKey].attackingPieceID + '] on block[' +
+      moveReg[mKey].fromBlockID + '] attacked block[' + moveReg[mKey].toBlockID +
+      '] and took piece[' + moveReg[mKey].enemyPieceID + ']';
     }
   }
   $('.moves').html(html);
@@ -746,44 +650,79 @@ showPossibleMoves = function () {
       pieceID: pieceID,
       blockID: blockID
     };
+
     values = prepareMoveVariables(data);
-    moves = gRules[pieceType].calculatePossibleMoves(values);
-
-    // check if piec eis the king and if it hasnt moved
-
-    moves['castle'] = pieceType === 'King' ? getCastlingMoves() : [];
-
-
-    console.log(moves);
-
-    //highlight the blocks the player can move the $piece
+    //
+    moves = gRules[pieceType].calculatePossibleMoves(values, 'showPossibleMoves');
+    //
+    moves = filterForEscapeCheckMoves(moves);
+    //
+    moves['castle'] = filterIleagalCastling(moves);
+    //
     highLightBlocks(moves, data);
   }
 },
 
-getCastlingMoves = function (aKingColour) {
-  // console.log('getCastlingMoves for ' + aKingColour + ' king');
+filterIleagalCastling = function (aMoves) {
+  var move, mKey, leftRight,
+    castleMoves = aMoves.castle,
+    possibleMoves = [],
+    king = gPieces[turn.player.colour].k,
+    isLeagal;
 
-  var moves = [], king = gPieces[turn.player.colour].k;
+    for (mKey in castleMoves) {
+      move = castleMoves[mKey];
+      leftRight = move.x > king.x ? 1 : -1;
+      isLeagal = _.findWhere(aMoves.move, {x: king.x + leftRight, y: king.y});
 
+      if (isLeagal !== undefined) {
+        possibleMoves.push(move);
+      }
+    }
 
-  // console.log('king', king);
+  return possibleMoves;
+},
 
-  if (king.moveCount === 0) {
-    moves.push({
-      x: king.x + 2,
-      y: king.y,
-      type: 'castle',
-      direction: 'lateral'
-    });
-    moves.push({
-      x: king.x - 2,
-      y: king.y,
-      type: 'castle',
-      direction: 'lateral'
-    });
+getCastlingMoves = function (aMoves, aWho) {
+  var
+    rKey, rook, rookBlockID, inc, i, x, b1, b2, b3,
+    castleMoves = [],
+    incArray = [-1, 1],
+    colour = turn.player.colour,
+    king = gPieces[colour].k;
+
+  if (king.moveCount === 0 && !gWhoIsInCheck[colour]) {
+    for (i in incArray) {
+      inc = incArray[i];
+      x = king.x + inc;
+      b1 = 'x' + x + '_y' + king.y;
+      b2 = 'x' + (x + inc) + '_y' + king.y;
+      b3 = 'x' + (x + (inc * 2)) + '_y' + king.y;
+
+      rKey = 'r' + (parseInt(i, 10) + 1);
+      rook = gPieces[colour][rKey];
+      rookBlockID = 'x' + rook.x + '_y' + rook.y;
+
+      if (
+        gBlockArr[b1] === 'empty'
+        &&
+        gBlockArr[b2] === 'empty'
+        &&
+        (gBlockArr[b3] === 'empty' || rookBlockID === b3)
+        &&
+        rook.moveCount === 0
+      ) {
+        castleMoves.push({
+          x: x + inc,
+          y: king.y,
+          type: 'castle',
+          direction: 'lateral'
+        });
+      }
+    }
   }
-  return moves;
+
+  return castleMoves;
 },
 
 addClick4PossibleMoves = function () {
@@ -794,11 +733,10 @@ addClick4PossibleMoves = function () {
 },
 
 incrementCounters = function (aPieceID) {
-  var
-    pieceKeys = getPieceKeys(aPieceID);
+  var pieceKeys = getPieceKeys(aPieceID);
 
   turn.turnCount++;
-  gPieces[pieceKeys.colour][pieceKeys.key].moveCount++
+  gPieces[pieceKeys.colour][pieceKeys.key].moveCount++;
 },
 
 nextPlayerTurn = function () {
@@ -869,9 +807,22 @@ buildBoard = function () {
     }
   }
 
-  $('body').append('<div title="Move Registery" style="top: 0px; left: 800px;" class="moveRegistery"><div>Move Registery</div><div class="moves"></div></div>');
+  // $('body').append('<div
+  //   title="Move Registery"
+  //   style="top: 0px; left: 800px;"
+  //   class="moveRegistery"
+  //   >
+  //     <div>Move Registery</div>
+  //     <div class="moves"></div>
+  //   </div>');
 
-  $('body').append('<div title="taken pieces" style="top: 800px; left: 0px;" class="takenPieces">Taken Pieces</div>');
+  // $('body').append('<div
+    // title="taken pieces"
+    // style="top: 800px; left: 0px;"
+    // class="takenPieces"
+    // >
+    //   Taken Pieces
+    // </div>');
 
   shuffle(gBlockIndex);
   gIndex = 0;
@@ -929,27 +880,22 @@ placePieces = function(){
 },
 
 checkQueenColour = function () {
-  var clone, queen, queenBlock, king, kingBlock, colour;
+  var clone, queen, queenBlockID, queenBlock, king, kingBlock, colour, q;
   for (colour in colours) {
+    q = gPieces[colour].q;
     queen = $('#' + colour + '_q');
-    queenBlock = $('#' + queen.parent()[0].id);
-    king = $('#' + colour + '_k');
-    kingBlock = $('#' + king.parent()[0].id);
-    if (queen.attr('colour') !== queenBlock.attr('colour')) {
-      //swop queen with king
-      clone = queenBlock.html();
-      queenBlock.html(kingBlock.html());
-      kingBlock.html(clone);
+    queenBlockID = q !== undefined ? 'x' + q.x + '_y' + q.y : false;
+
+    if (queenBlockID) {
+      queenBlock = $('#' + queenBlockID);
+      king = $('#' + colour + '_k');
+      kingBlock = $('#' + king.parent()[0].id);
+      if (queen.attr('colour') !== queenBlock.attr('colour')) {
+        //swop queen with king
+        clone = queenBlock.html();
+        queenBlock.html(kingBlock.html());
+        kingBlock.html(clone);
+      }
     }
-  }
-},
-
-prepareTemplates = function () {
-  var template, source, tKey,
-    tKeys = Object.keys(templates);
-
-  for (tKey in templates) {
-    source  = $('#' + tKey).html();
-    templates[tKey] = Handlebars.compile(source);
   }
 };
