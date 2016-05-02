@@ -79,61 +79,23 @@ templates = {
 gPieces = {
   white : {
     k  : {name: 'King', x: 4, y: 7, moveCount: 0},
-    // q  : {name: 'Queen', x: 3, y: 7, moveCount: 0},
+    q  : {name: 'Queen', x: 3, y: 7, moveCount: 0},
     r1 : {name: 'Rook', x: 0, y: 7, moveCount: 0},
     r2 : {name: 'Rook', x: 7, y: 7, moveCount: 0},
-    // b1 : {name: 'Bishop', x: 1, y: 6, moveCount: 0},
-    // b2 : {name: 'Bishop', x: 6, y: 6, moveCount: 0},
-    // k1 : {name: 'Knight', x: 0, y: 5, moveCount: 0},
-    // k2 : {name: 'Knight', x: 7, y: 5, moveCount: 0},
-    // p1 : {name: 'Pawn', x: 0, y: 6, moveCount: 0},
-    // p2 : {name: 'Pawn', x: 1, y: 6, moveCount: 0},
-    // p3 : {name: 'Pawn', x: 2, y: 6, moveCount: 0},
-    // p4 : {name: 'Pawn', x: 3, y: 6, moveCount: 0},
-    // p5 : {name: 'Pawn', x: 4, y: 6, moveCount: 0},
-    // p6 : {name: 'Pawn', x: 5, y: 6, moveCount: 0},
-    // p7 : {name: 'Pawn', x: 6, y: 6, moveCount: 0},
-    // p8 : {name: 'Pawn', x: 7, y: 6, moveCount: 0}
-
-
-    // original
-    // k  : {name: 'King', x: 4, y: 7, moveCount: 0},
-    // q  : {name: 'Queen', x: 3, y: 7, moveCount: 0},
-    // r1 : {name: 'Rook', x: 0, y: 7, moveCount: 0},
-    // r2 : {name: 'Rook', x: 7, y: 7, moveCount: 0},
-    // b1 : {name: 'Bishop', x: 2, y: 7, moveCount: 0},
-    // b2 : {name: 'Bishop', x: 5, y: 7, moveCount: 0},
-    // k1 : {name: 'Knight', x: 1, y: 7, moveCount: 0},
-    // k2 : {name: 'Knight', x: 6, y: 7, moveCount: 0},
-    // p1 : {name: 'Pawn', x: 0, y: 6, moveCount: 0},
-    // p2 : {name: 'Pawn', x: 1, y: 6, moveCount: 0},
-    // p3 : {name: 'Pawn', x: 2, y: 6, moveCount: 0},
-    // p4 : {name: 'Pawn', x: 3, y: 6, moveCount: 0},
-    // p5 : {name: 'Pawn', x: 4, y: 6, moveCount: 0},
-    // p6 : {name: 'Pawn', x: 5, y: 6, moveCount: 0},
-    // p7 : {name: 'Pawn', x: 6, y: 6, moveCount: 0},
-    // p8 : {name: 'Pawn', x: 7, y: 6, moveCount: 0}
+    b1 : {name: 'Bishop', x: 2, y: 7, moveCount: 0},
+    b2 : {name: 'Bishop', x: 5, y: 7, moveCount: 0},
+    k1 : {name: 'Knight', x: 1, y: 7, moveCount: 0},
+    k2 : {name: 'Knight', x: 6, y: 7, moveCount: 0},
+    p1 : {name: 'Pawn', x: 0, y: 6, moveCount: 0},
+    p2 : {name: 'Pawn', x: 1, y: 6, moveCount: 0},
+    p3 : {name: 'Pawn', x: 2, y: 6, moveCount: 0},
+    p4 : {name: 'Pawn', x: 3, y: 6, moveCount: 0},
+    p5 : {name: 'Pawn', x: 4, y: 6, moveCount: 0},
+    p6 : {name: 'Pawn', x: 5, y: 6, moveCount: 0},
+    p7 : {name: 'Pawn', x: 6, y: 6, moveCount: 0},
+    p8 : {name: 'Pawn', x: 7, y: 6, moveCount: 0}
   },
   black : {
-    k  : {name: 'King', x: 4, y: 0, moveCount: 0},
-    // q  : {name: 'Queen', x: 3, y: 0, moveCount: 0},
-    r1 : {name: 'Rook', x: 0, y: 0, moveCount: 0},
-    r2 : {name: 'Rook', x: 7, y: 0, moveCount: 0},
-    // b1 : {name: 'Bishop', x: 2, y: 2, moveCount: 0},
-    // b2 : {name: 'Bishop', x: 5, y: 2, moveCount: 0},
-    // k1 : {name: 'Knight', x: 1, y: 1, moveCount: 0},
-    // k2 : {name: 'Knight', x: 6, y: 1, moveCount: 0}
-
-    // p1 : {name: 'Pawn', x: 0, y: 1, moveCount: 0},
-    // p2 : {name: 'Pawn', x: 1, y: 1, moveCount: 0},
-    // p3 : {name: 'Pawn', x: 2, y: 1, moveCount: 0},
-    // p4 : {name: 'Pawn', x: 3, y: 1, moveCount: 0},
-    // p5 : {name: 'Pawn', x: 4, y: 1, moveCount: 0},
-    // p6 : {name: 'Pawn', x: 5, y: 1, moveCount: 0},
-    // p7 : {name: 'Pawn', x: 6, y: 1, moveCount: 0},
-    // p8 : {name: 'Pawn', x: 7, y: 1, moveCount: 0}
-
-    /*
     k  : {name: 'King', x: 4, y: 0, moveCount: 0},
     q  : {name: 'Queen', x: 3, y: 0, moveCount: 0},
     r1 : {name: 'Rook', x: 0, y: 0, moveCount: 0},
@@ -150,7 +112,6 @@ gPieces = {
     p6 : {name: 'Pawn', x: 5, y: 1, moveCount: 0},
     p7 : {name: 'Pawn', x: 6, y: 1, moveCount: 0},
     p8 : {name: 'Pawn', x: 7, y: 1, moveCount: 0}
-    */
   }
 },
 
